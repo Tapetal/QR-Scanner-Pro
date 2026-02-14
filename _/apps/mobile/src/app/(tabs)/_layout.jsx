@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
-import { Brain, Archive, User } from "lucide-react-native";
+import { Camera, QrCode, Brain, Archive, User } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View } from "react-native";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -22,19 +21,34 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#9ca3af",
       }}
     >
+      {/* QR Scanner Tab */}
       <Tabs.Screen
-        name="index"
+        name="scanner"
         options={{
-          href: null,
+          title: "Scan",
+          tabBarIcon: ({ color, size }) => <Camera color={color} size={size} />,
         }}
       />
+
+      {/* QR Generator Tab */}
+      <Tabs.Screen
+        name="generate"
+        options={{
+          title: "Generate",
+          tabBarIcon: ({ color, size }) => <QrCode color={color} size={size} />,
+        }}
+      />
+
+      {/* Puzzle Tab */}
       <Tabs.Screen
         name="puzzle"
         options={{
-          title: "Today",
+          title: "Puzzle",
           tabBarIcon: ({ color, size }) => <Brain color={color} size={size} />,
         }}
       />
+
+      {/* History/Archive Tab */}
       <Tabs.Screen
         name="history"
         options={{
@@ -44,6 +58,8 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* Profile Tab */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -51,8 +67,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
+
+      {/* Hide the index route */}
       <Tabs.Screen
-        name="generate"
+        name="index"
         options={{
           href: null,
         }}

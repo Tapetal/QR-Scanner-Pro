@@ -1,5 +1,6 @@
 import { Redirect } from "expo-router";
 
 export default function Index() {
-  return <Redirect href="/(tabs)/puzzle" />;
+  // Redirect to the scanner tab by default
+  return <Redirect href="/(tabs)/scanner" />;
 }

@@ -20,7 +20,28 @@ import {
   TestIds,
 } from "react-native-google-mobile-ads";
 import AdBanner from "../../components/AdBanner";
-import { addToHistory } from "../../utils/storage";
+
+// Storage helper
+const addToHistory = async (scanData) => {
+  try {
+    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+    const historyKey = "qr_scan_history";
+    const existing = await AsyncStorage.getItem(historyKey);
+    const history = existing ? JSON.parse(existing) : [];
+    
+    const newEntry = {
+      ...scanData,
+      timestamp: new Date().toISOString(),
+      id: Date.now().toString(),
+    };
+    
+    // Keep last 20 scans
+    const updated = [newEntry, ...history].slice(0, 20);
+    await AsyncStorage.setItem(historyKey, JSON.stringify(updated));
+  } catch (error) {
+    console.log("Error saving to history:", error);
+  }
+};
 
 // IMPORTANT: Replace these with your actual AdMob IDs from https://apps.admob.com
 const adUnitId = Platform.select({
@@ -326,5 +347,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
-

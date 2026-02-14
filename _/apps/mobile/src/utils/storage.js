@@ -1,34 +1,36 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const HISTORY_KEY = "scan_history";
+const HISTORY_KEY = "qr_scan_history";
 const MAX_HISTORY = 20;
 
-export const getHistory = async () => {
+export const addToHistory = async (scanData) => {
   try {
-    const jsonValue = await AsyncStorage.getItem(HISTORY_KEY);
-    return jsonValue != null ? JSON.parse(jsonValue) : [];
-  } catch (e) {
-    console.error("Error reading history", e);
+    const existing = await AsyncStorage.getItem(HISTORY_KEY);
+    const history = existing ? JSON.parse(existing) : [];
+    
+    const newEntry = {
+      ...scanData,
+      timestamp: new Date().toISOString(),
+      id: Date.now().toString(),
+    };
+    
+    // Keep last 20 scans
+    const updated = [newEntry, ...history].slice(0, MAX_HISTORY);
+    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    
+    return updated;
+  } catch (error) {
+    console.error("Error saving to history:", error);
     return [];
   }
 };
 
-export const addToHistory = async (item) => {
+export const getHistory = async () => {
   try {
-    const currentHistory = await getHistory();
-    const newItem = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      ...item,
-    };
-
-    // Add to top, limit to MAX_HISTORY
-    const newHistory = [newItem, ...currentHistory].slice(0, MAX_HISTORY);
-
-    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-    return newHistory;
-  } catch (e) {
-    console.error("Error saving history", e);
+    const history = await AsyncStorage.getItem(HISTORY_KEY);
+    return history ? JSON.parse(history) : [];
+  } catch (error) {
+    console.error("Error getting history:", error);
     return [];
   }
 };
@@ -36,8 +38,21 @@ export const addToHistory = async (item) => {
 export const clearHistory = async () => {
   try {
     await AsyncStorage.removeItem(HISTORY_KEY);
+    return true;
+  } catch (error) {
+    console.error("Error clearing history:", error);
+    return false;
+  }
+};
+
+export const deleteHistoryItem = async (id) => {
+  try {
+    const history = await getHistory();
+    const filtered = history.filter(item => item.id !== id);
+    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
+    return filtered;
+  } catch (error) {
+    console.error("Error deleting history item:", error);
     return [];
-  } catch (e) {
-    console.error("Error clearing history", e);
   }
 };
