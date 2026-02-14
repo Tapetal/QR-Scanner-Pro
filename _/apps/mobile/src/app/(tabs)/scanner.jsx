@@ -19,7 +19,18 @@ import {
   AdEventType,
   TestIds,
 } from "react-native-google-mobile-ads";
+import mobileAds from 'react-native-google-mobile-ads';
 import AdBanner from "../../components/AdBanner";
+
+// CRITICAL: Initialize AdMob
+mobileAds()
+  .initialize()
+  .then(adapterStatuses => {
+    console.log('✅ AdMob initialized in Scanner');
+  })
+  .catch(error => {
+    console.error('❌ AdMob init error:', error);
+  });
 
 // Storage helper
 const addToHistory = async (scanData) => {
@@ -43,14 +54,16 @@ const addToHistory = async (scanData) => {
   }
 };
 
-// IMPORTANT: Replace these with your actual AdMob IDs from https://apps.admob.com
+// YOUR ACTUAL AD UNIT ID FROM ADMOB
+// Go to: https://apps.admob.google.com/ → QR Scanner Pro → Ad units → "Scan Interstitial"
+// Copy the FULL ad unit ID and paste below
 const adUnitId = Platform.select({
   ios: __DEV__
     ? TestIds.INTERSTITIAL
-    : "ca-app-pub-5036330009914748/4329594688", // Replace with your iOS interstitial ad unit ID
+    : "ca-app-pub-5036330009914748/4329594688", // Your iOS Interstitial ID
   android: __DEV__
     ? TestIds.INTERSTITIAL
-    : "ca-app-pub-5036330009914748/9526081045", // Replace with your Android interstitial ad unit ID
+    : "ca-app-pub-5036330009914748/9526081045", // REPLACE with "Scan Interstitial" ID
 });
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -70,6 +83,7 @@ export default function ScanScreen() {
     const unsubscribeLoaded = interstitial.addAdEventListener(
       AdEventType.LOADED,
       () => {
+        console.log('✅ Interstitial ad loaded');
         setInterstitialLoaded(true);
       }
     );
@@ -77,25 +91,41 @@ export default function ScanScreen() {
     const unsubscribeClosed = interstitial.addAdEventListener(
       AdEventType.CLOSED,
       () => {
+        console.log('📱 Interstitial ad closed');
         setInterstitialLoaded(false);
         // Load next ad
         interstitial.load();
       }
     );
 
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error('❌ Interstitial ad error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        setInterstitialLoaded(false);
+      }
+    );
+
     // Start loading the first ad
+    console.log('🔄 Loading first interstitial ad...');
     interstitial.load();
 
     return () => {
       unsubscribeLoaded();
       unsubscribeClosed();
+      unsubscribeError();
     };
   }, []);
 
   // Show interstitial ad after every 3 scans
   useEffect(() => {
     if (scanCount > 0 && scanCount % 3 === 0 && interstitialLoaded) {
-      interstitial.show();
+      console.log(`📢 Showing interstitial ad after ${scanCount} scans`);
+      interstitial.show().catch(error => {
+        console.error('❌ Error showing interstitial:', error);
+      });
     }
   }, [scanCount, interstitialLoaded]);
 
