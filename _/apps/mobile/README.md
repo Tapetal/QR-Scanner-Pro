@@ -162,8 +162,8 @@ That's it! Your app now has both QR Scanner and Puzzles! 🎉
 Update these in `app.json`:
 - `name`: "Your App Name"
 - `slug`: "your-app-slug"
-- `android.package`: "com.yourcompany.yourapp"
-- `ios.bundleIdentifier`: "com.yourcompany.yourapp"
+- `android.package`: "com.tapetal.qrscannerapp"
+- `ios.bundleIdentifier`: "com.tapetal.qrscannerapp"
 
 ### 3. App Icons
 Replace these files in `assets/images/`:

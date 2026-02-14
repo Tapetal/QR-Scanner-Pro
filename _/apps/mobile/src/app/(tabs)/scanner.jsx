@@ -47,10 +47,10 @@ const addToHistory = async (scanData) => {
 const adUnitId = Platform.select({
   ios: __DEV__
     ? TestIds.INTERSTITIAL
-    : "ca-app-pub-5036330009914748/7895334988", // Replace with your iOS interstitial ad unit ID
+    : "ca-app-pub-5036330009914748/4329594688", // Replace with your iOS interstitial ad unit ID
   android: __DEV__
     ? TestIds.INTERSTITIAL
-    : "ca-app-pub-5036330009914748/4332426703", // Replace with your Android interstitial ad unit ID
+    : "ca-app-pub-5036330009914748/9526081045", // Replace with your Android interstitial ad unit ID
 });
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {

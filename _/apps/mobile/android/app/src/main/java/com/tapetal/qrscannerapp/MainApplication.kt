@@ -1,4 +1,4 @@
-package com.yourcompany.qrscannerpro
+package com.tapetal.qrscannerapp
 
 import android.app.Application
 import android.content.res.Configuration

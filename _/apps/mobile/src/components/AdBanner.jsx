@@ -8,8 +8,8 @@ import {
 
 // IMPORTANT: Replace these with your actual AdMob IDs from https://apps.admob.com
 const adUnitId = Platform.select({
-  ios: __DEV__ ? TestIds.BANNER : "ca-app-pub-5036330009914748/9333471940", // Replace with your iOS ad unit ID
-  android: __DEV__ ? TestIds.BANNER : "ca-app-pub-5036330009914748/5090974609", // Replace with your Android ad unit ID
+  ios: __DEV__ ? TestIds.BANNER : "ca-app-pub-5036330009914748/3890610985", // Replace with your iOS ad unit ID
+  android: __DEV__ ? TestIds.BANNER : "ca-app-pub-5036330009914748/8460411385", // Replace with your Android ad unit ID
 });
 
 export default function AdBanner() {

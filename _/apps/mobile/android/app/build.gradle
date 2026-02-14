@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.yourcompany.qrscannerpro'
+    namespace 'com.tapetal.qrscannerapp'
     defaultConfig {
-        applicationId 'com.yourcompany.qrscannerpro'
+        applicationId 'com.tapetal.qrscannerapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

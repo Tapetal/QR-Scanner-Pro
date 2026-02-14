@@ -12,9 +12,9 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSUserTrackingUsageDescription": "This app uses advertising identifiers to show you relevant ads.",
-        "GADApplicationIdentifier": "ca-app-pub-5036330009914748~2273239574"
+        "GADApplicationIdentifier": "ca-app-pub-5036330009914748~4511324448"
       },
-      "bundleIdentifier": "com.yourcompany.qrscannerpo"
+      "bundleIdentifier": "com.tapetal.qrscannerapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +26,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.yourcompany.qrscannerpro"
+      "package": "com.tapetal.qrscannerapp"
     },
     "plugins": [
       [
@@ -65,8 +65,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-5036330009914748~7489073082",
-          "iosAppId": "ca-app-pub-5036330009914748~2273239574",
+          "androidAppId": "ca-app-pub-5036330009914748~2845122621",
+          "iosAppId": "ca-app-pub-5036330009914748~4511324448",
           "userTrackingPermission": "This app uses advertising identifiers to show you relevant ads."
         }
       ],

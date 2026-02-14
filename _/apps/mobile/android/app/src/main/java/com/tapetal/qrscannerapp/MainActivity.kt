@@ -1,4 +1,4 @@
-package com.yourcompany.qrscannerpro
+package com.tapetal.qrscannerapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

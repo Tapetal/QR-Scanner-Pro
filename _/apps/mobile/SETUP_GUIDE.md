@@ -230,10 +230,10 @@ assets/images/splash-icon.png (1024x1024)
 **File: `app.json`**
 ```json
 "android": {
-  "package": "com.yourcompany.yourappname"
+  "package": "com.tapetal.qrscannerappname"
 },
 "ios": {
-  "bundleIdentifier": "com.yourcompany.yourappname"
+  "bundleIdentifier": "com.tapetal.qrscannerappname"
 }
 ```
 
