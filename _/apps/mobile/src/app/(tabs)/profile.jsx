@@ -23,7 +23,7 @@ import AdBanner from "../../components/AdBanner";
 
 const NOTIFICATION_ENABLED_KEY = "notifications_enabled";
 
-export default function ProfileScreen() {
+function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [streak, setStreak] = useState(0);
   const [totalSolved, setTotalSolved] = useState(0);
@@ -334,3 +334,4 @@ export default function ProfileScreen() {
     </View>
   );
 }
+export default ProfileScreen;

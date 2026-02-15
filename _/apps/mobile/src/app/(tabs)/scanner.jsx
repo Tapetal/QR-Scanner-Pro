@@ -70,7 +70,7 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,
 });
 
-export default function ScanScreen() {
+ function ScanScreen() {
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
@@ -377,3 +377,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
+export default ScanScreen;

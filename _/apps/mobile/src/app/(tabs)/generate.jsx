@@ -22,7 +22,7 @@ const TYPES = [
   { id: "wifi", label: "WiFi", icon: Wifi },
 ];
 
-export default function GenerateScreen() {
+function GenerateScreen() {
   const insets = useSafeAreaInsets();
   const [activeType, setActiveType] = useState("text");
   const [content, setContent] = useState("");
@@ -431,5 +431,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
-
+export default GenerateScreen;

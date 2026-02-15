@@ -70,7 +70,8 @@
           "userTrackingPermission": "This app uses advertising identifiers to show you relevant ads."
         }
       ],
-      "expo-camera"
+      "expo-camera",
+      "expo-asset"
     ],
     "web": {
       "bundler": "metro",

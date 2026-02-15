@@ -14,7 +14,7 @@ import {
 } from "../../utils/puzzleStorage";
 import AdBanner from "../../components/AdBanner";
 
-export default function PuzzleScreen() {
+function PuzzleScreen() {
   const insets = useSafeAreaInsets();
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [showHint, setShowHint] = useState(false);
@@ -303,3 +303,4 @@ export default function PuzzleScreen() {
     </View>
   );
 }
+export default PuzzleScreen;

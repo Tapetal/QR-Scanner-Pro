@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getSolvedPuzzles } from "../../utils/puzzleStorage";
 import AdBanner from "../../components/AdBanner";
 
-export default function ArchiveScreen() {
+function ArchiveScreen() {
   const insets = useSafeAreaInsets();
   const [solvedPuzzles, setSolvedPuzzles] = useState([]);
 
@@ -220,3 +220,4 @@ export default function ArchiveScreen() {
     </View>
   );
 }
+export default ArchiveScreen;
