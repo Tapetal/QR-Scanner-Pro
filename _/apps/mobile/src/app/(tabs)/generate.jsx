@@ -9,7 +9,7 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import { Image } from "expo-image";
+import { Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Type, Link, Wifi, AlertCircle } from "lucide-react-native";
 import { Share } from "react-native";

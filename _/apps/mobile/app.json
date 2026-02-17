@@ -2,6 +2,7 @@
   "expo": {
     "name": "QR Scanner Pro",
     "slug": "qr-scanner-pro",
+    "scheme": "qrscannerpro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
