@@ -1,7 +1,10 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Set up notification handler
+const NOTIFICATION_ID_KEY = "daily_notification_id";
+
+// 🔔 Handle foreground notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -10,83 +13,69 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// ✅ Request permissions
 export const requestNotificationPermissions = async () => {
   try {
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("daily-puzzle", {
         name: "Daily Puzzle Reminder",
         importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
         sound: "default",
       });
     }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    return finalStatus === "granted";
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === "granted";
   } catch (error) {
-    console.error("Error requesting notification permissions:", error);
+    console.error("Permission error:", error);
     return false;
   }
 };
 
+// ✅ Schedule notification (saves ID)
 export const scheduleDailyNotification = async () => {
   try {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    // Cancel any previous first
+    await cancelDailyNotification();
 
-    let trigger;
-    if (Platform.OS === "android") {
-      const now = new Date();
-      const next9AM = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        9, 0, 0
-      );
-
-      // If it's already past 9 AM today, schedule for tomorrow
-      if (now > next9AM) {
-        next9AM.setDate(next9AM.getDate() + 1);
-      }
-
-      // Calculate seconds until next 9 AM
-      const secondsUntilNext9AM = Math.round((next9AM.getTime() - now.getTime()) / 1000);
-
-      trigger = {
-        type: "time",
-        seconds: secondsUntilNext9AM,
-        repeats: true,        // repeat every interval
-      };
-    } else {
-      // iOS calendar trigger
-      trigger = {
-        type: "calendar",
-        hour: 9,
-        minute: 0,
-        repeats: true,
-      };
-    }
-
-    await Notifications.scheduleNotificationAsync({
+    const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: "🧠 New Brain Teaser Available!",
         body: "Your daily puzzle is ready. Can you solve it?",
         sound: true,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
       },
-      trigger,
+      trigger: {
+        hour: 9,
+        minute: 0,
+        repeats: true,
+      },
     });
+
+    await AsyncStorage.setItem(NOTIFICATION_ID_KEY, id);
 
     return true;
   } catch (error) {
-    console.error("Error scheduling notification:", error);
+    console.error("Schedule error:", error);
     return false;
   }
 };
 
+// ✅ Cancel by stored ID (VERY IMPORTANT)
+export const cancelDailyNotification = async () => {
+  try {
+    const id = await AsyncStorage.getItem(NOTIFICATION_ID_KEY);
+
+    if (id) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+      await AsyncStorage.removeItem(NOTIFICATION_ID_KEY);
+    }
+
+    // Extra safety clear
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    return true;
+  } catch (error) {
+    console.error("Cancel error:", error);
+    return false;
+  }
+};
