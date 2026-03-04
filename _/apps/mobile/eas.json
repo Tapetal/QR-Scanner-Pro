@@ -1,14 +1,15 @@
 {
-	"cli": {
-		"version": ">= 15.0.15",
-		"appVersionSource": "remote"
-	},
-	"build": {
+  "cli": {
+    "version": ">= 15.0.15",
+    "appVersionSource": "remote"
+  },
+  "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "prebuildCommand": "npx expo prebuild --clean",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
@@ -28,5 +29,3 @@
     "production": {}
   }
 }
-
-  
