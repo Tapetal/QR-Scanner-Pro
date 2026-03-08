@@ -53,7 +53,7 @@ We use Google AdMob to display advertisements in the app. AdMob may collect:
 
 ### Third-Party Services:
 
-1. **QR Server (api.qrserver.com)**
+1. **QR Server ([api.qrserver.com](api.qrserver.com))**
    - **What We Share**: WiFi network names (SSID) and passwords (only when you consent)
    - **Purpose**: QR code image generation
    - **Their Privacy Policy**: [QR Server API Documentation](https://goqr.me/api/)
@@ -82,7 +82,7 @@ We do not sell your personal information to anyone.
 If you encounter an inappropriate advertisement:
 1. Note the advertiser name or take a screenshot
 2. Go to Profile > Settings > Report Ad in the app
-3. Or email us at aminuashraf55@gmail.com with details
+3. Or email us at [aminuashraf55@gmail.com](mailto:aminuashraf55@gmail.com) with details
 
 We will investigate and report inappropriate ads to Google AdMob immediately.
 
