@@ -33,30 +33,36 @@ We use Google AdMob to display advertisements in the app. AdMob may collect:
 - App usage data
 - Ad interaction data
 
-**How AdMob Uses This Data**: To show you relevant advertisements and measure ad performance. For complete details, see Google's Privacy Policy: https://policies.google.com/privacy
+### 5. Camera
+- **Camera Access**: The app uses your device camera solely to scan QR codes and barcodes
+- **No Recording**: The app does not record, store, or transmit camera images or video
+- **Local Processing**: All camera data is processed in real-time on your device only
+- **Permission**: Camera access is requested only when you use the Scanner feature
+
+**How AdMob Uses This Data**: To show you relevant advertisements and measure ad performance. For complete details, see [Google's Privacy Policy](https://policies.google.com/privacy).
 
 **Ad Personalization**: We request non-personalized ads by default. You can control ad personalization through your device settings (iOS: Settings > Privacy > Advertising; Android: Settings > Google > Ads).
 
 ## How We Use Your Information
 
 - **Locally Stored Data**: Scan history, generated QR codes, puzzle statistics, and preferences are stored on your device for app functionality
-- **WiFi QR Code Generation**: Sent to api.qrserver.com only with your explicit consent to generate QR code images
+- **WiFi QR Code Generation**: Sent only with your explicit consent to generate QR code images
 - **Advertising**: AdMob uses collected data to serve ads and improve ad relevance
 
 ## Data Sharing
 
 ### Third-Party Services:
 
-1. **QR Server (api.qrserver.com)**
+1. **QR Server ([api.qrserver.com](api.qrserver.com))**
    - **What We Share**: WiFi network names (SSID) and passwords (only when you consent)
    - **Purpose**: QR code image generation
-   - **Their Privacy Policy**: https://goqr.me/api/
+   - **Their Privacy Policy**: [QR Server API Documentation](https://goqr.me/api/)
    - **Data Protection**: QR Server processes data to generate images and does not store your WiFi credentials permanently
 
 2. **Google AdMob**
    - **What They Collect**: Device info, advertising IDs, usage data
    - **Purpose**: Ad serving and measurement
-   - **Their Privacy Policy**: https://policies.google.com/privacy
+   - **Their Privacy Policy**: [Google Privacy Policy](https://policies.google.com/privacy)
 
 We do not sell your personal information to anyone.
 
@@ -76,7 +82,7 @@ We do not sell your personal information to anyone.
 If you encounter an inappropriate advertisement:
 1. Note the advertiser name or take a screenshot
 2. Go to Profile > Settings > Report Ad in the app
-3. Or email us at support@qrscannerpro.com with details
+3. Or email us at [aminuashraf55@gmail.com](mailto:aminuashraf55@gmail.com) with details
 
 We will investigate and report inappropriate ads to Google AdMob immediately.
 
@@ -115,8 +121,7 @@ If you use our app outside your country of residence, your data may be transferr
 
 If you have questions about this Privacy Policy or our data practices:
 
-**Email**: support@qrscannerpro.com
-**Website**: [Your website URL]
+**Email**: [aminuashraf55@gmail.com](mailto:aminuashraf55@gmail.com)
 
 ## Legal Compliance
 
