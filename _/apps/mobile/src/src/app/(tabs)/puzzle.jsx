@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  TextInput,
+  Animated,
+  Vibration,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
-import { Lightbulb, CheckCircle, Trophy, Flame } from "lucide-react-native";
+import { Lightbulb, CheckCircle, Trophy, Flame, Send } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 import { puzzles } from "../../utils/puzzleData";
 import {
@@ -21,6 +30,9 @@ function PuzzleScreen() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [streak, setStreak] = useState(0);
   const [canSolve, setCanSolve] = useState(true);
+  const [userAnswer, setUserAnswer] = useState("");
+  const [answerState, setAnswerState] = useState("idle"); // idle | correct | wrong
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -32,32 +44,60 @@ function PuzzleScreen() {
     const index = await getCurrentPuzzleIndex();
     const puzzleIndex = index % puzzles.length;
     setCurrentPuzzle(puzzles[puzzleIndex]);
-
     const currentStreak = await getStreak();
     setStreak(currentStreak);
-
     const canSolveNow = await canSolveToday();
     setCanSolve(canSolveNow);
     setShowHint(false);
     setShowAnswer(!canSolveNow);
+    setUserAnswer("");
+    setAnswerState("idle");
   };
 
-  const handleSolved = async () => {
-    if (!canSolve) {
-      Alert.alert("Already Solved", "Come back tomorrow for a new puzzle!");
-      return;
+  const triggerShake = () => {
+    Vibration.vibrate(400);
+    shakeAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const normalizeAnswer = (str) =>
+    str.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+
+  const handleSubmitAnswer = async () => {
+    if (!userAnswer.trim()) return;
+
+    const userNorm = normalizeAnswer(userAnswer);
+    const correctNorm = normalizeAnswer(currentPuzzle.answer);
+
+    // Check if user answer contains or matches the correct answer
+    const isCorrect =
+      userNorm === correctNorm ||
+      userNorm.includes(correctNorm) ||
+      correctNorm.includes(userNorm);
+
+    if (isCorrect) {
+      setAnswerState("correct");
+      const result = await markPuzzleSolved(currentPuzzle);
+      setStreak(result.streak);
+      setShowAnswer(true);
+      setCanSolve(false);
+      Alert.alert(
+        "Well Done! 🎉",
+        `That's correct!\nStreak: ${result.streak} day${result.streak !== 1 ? "s" : ""}!`,
+        [{ text: "Great!" }],
+      );
+    } else {
+      setAnswerState("wrong");
+      triggerShake();
+      // Reset wrong state after 1.5 seconds
+      setTimeout(() => setAnswerState("idle"), 1500);
     }
-
-    const result = await markPuzzleSolved(currentPuzzle);
-    setStreak(result.streak);
-    setShowAnswer(true);
-    setCanSolve(false);
-
-    Alert.alert(
-      "Well Done! 🎉",
-      `Streak: ${result.streak} day${result.streak !== 1 ? "s" : ""}!`,
-      [{ text: "Great!" }],
-    );
   };
 
   const handleNextPuzzle = async () => {
@@ -78,8 +118,21 @@ function PuzzleScreen() {
     Math: "#3b82f6",
     Riddles: "#ec4899",
   };
-
   const categoryColor = categoryColors[currentPuzzle.category] || "#6b7280";
+
+  const inputBorderColor =
+    answerState === "correct"
+      ? "#10b981"
+      : answerState === "wrong"
+      ? "#ef4444"
+      : "#e5e7eb";
+
+  const inputBgColor =
+    answerState === "correct"
+      ? "#f0fdf4"
+      : answerState === "wrong"
+      ? "#fef2f2"
+      : "#f9fafb";
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
@@ -113,13 +166,7 @@ function PuzzleScreen() {
               borderRadius: 12,
             }}
           >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: categoryColor,
-              }}
-            >
+            <Text style={{ fontSize: 14, fontWeight: "600", color: categoryColor }}>
               {currentPuzzle.category}
             </Text>
           </View>
@@ -128,12 +175,11 @@ function PuzzleScreen() {
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: insets.bottom + 100,
-        }}
+        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
+        {/* Question Card */}
         <View
           style={{
             backgroundColor: "#fff",
@@ -147,18 +193,64 @@ function PuzzleScreen() {
             elevation: 3,
           }}
         >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "600",
-              lineHeight: 28,
-              color: "#1f2937",
-            }}
-          >
+          <Text style={{ fontSize: 20, fontWeight: "600", lineHeight: 28, color: "#1f2937" }}>
             {currentPuzzle.question}
           </Text>
         </View>
 
+        {/* Answer Input — only show if not yet solved */}
+        {canSolve && !showAnswer && (
+          <Animated.View
+            style={{
+              transform: [{ translateX: shakeAnim }],
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", marginBottom: 8 }}>
+              Your Answer
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TextInput
+                style={{
+                  flex: 1,
+                  backgroundColor: inputBgColor,
+                  borderWidth: 2,
+                  borderColor: inputBorderColor,
+                  borderRadius: 12,
+                  padding: 14,
+                  fontSize: 16,
+                  color: "#1f2937",
+                }}
+                placeholder="Type your answer here..."
+                placeholderTextColor="#9ca3af"
+                value={userAnswer}
+                onChangeText={setUserAnswer}
+                onSubmitEditing={handleSubmitAnswer}
+                returnKeyType="done"
+                editable={answerState !== "correct"}
+              />
+              <TouchableOpacity
+                onPress={handleSubmitAnswer}
+                style={{
+                  backgroundColor: answerState === "wrong" ? "#ef4444" : "#8b5cf6",
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Send size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {answerState === "wrong" && (
+              <Text style={{ color: "#ef4444", fontSize: 13, marginTop: 6, marginLeft: 2 }}>
+                Not quite — try again or use a hint!
+              </Text>
+            )}
+          </Animated.View>
+        )}
+
+        {/* Hint toggle — hide after solved */}
         {!showAnswer && (
           <TouchableOpacity
             onPress={() => setShowHint(!showHint)}
@@ -175,14 +267,7 @@ function PuzzleScreen() {
             }}
           >
             <Lightbulb size={24} color={showHint ? "#fbbf24" : "#9ca3af"} />
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: showHint ? "#fbbf24" : "#6b7280",
-                flex: 1,
-              }}
-            >
+            <Text style={{ fontSize: 16, fontWeight: "600", color: showHint ? "#fbbf24" : "#6b7280", flex: 1 }}>
               {showHint ? "Hide Hint" : "Show Hint"}
             </Text>
           </TouchableOpacity>
@@ -205,33 +290,7 @@ function PuzzleScreen() {
           </View>
         )}
 
-        {!showAnswer && canSolve && (
-          <TouchableOpacity
-            onPress={handleSolved}
-            style={{
-              backgroundColor: "#10b981",
-              padding: 18,
-              borderRadius: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              marginBottom: 20,
-            }}
-          >
-            <CheckCircle size={24} color="#fff" />
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: "#fff",
-              }}
-            >
-              I Solved It!
-            </Text>
-          </TouchableOpacity>
-        )}
-
+        {/* Answer reveal */}
         {showAnswer && (
           <View style={{ marginBottom: 20 }}>
             <View
@@ -242,33 +301,13 @@ function PuzzleScreen() {
                 marginBottom: 12,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  color: "#d1fae5",
-                  marginBottom: 8,
-                }}
-              >
+              <Text style={{ fontSize: 14, fontWeight: "600", color: "#d1fae5", marginBottom: 8 }}>
                 ANSWER
               </Text>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: "#fff",
-                  marginBottom: 12,
-                }}
-              >
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff", marginBottom: 12 }}>
                 {currentPuzzle.answer}
               </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: "#d1fae5",
-                  lineHeight: 24,
-                }}
-              >
+              <Text style={{ fontSize: 16, color: "#d1fae5", lineHeight: 24 }}>
                 {currentPuzzle.explanation}
               </Text>
             </View>
@@ -283,14 +322,7 @@ function PuzzleScreen() {
                 }}
               >
                 <Trophy size={32} color="#f59e0b" />
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: "#92400e",
-                    marginTop: 8,
-                  }}
-                >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "#92400e", marginTop: 8 }}>
                   Come back tomorrow for a new puzzle!
                 </Text>
               </View>
@@ -303,4 +335,5 @@ function PuzzleScreen() {
     </View>
   );
 }
+
 export default PuzzleScreen;

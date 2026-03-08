@@ -79,7 +79,7 @@ function ProfileScreen() {
           text: "Send Email",
           onPress: () => {
             Linking.openURL(
-              "mailto:support@qrscannerpro.com?subject=Inappropriate Ad Report&body=Please describe the ad you saw, including when and where it appeared in the app."
+              "mailto:aminuashraf55@gmail.com?subject=Inappropriate Ad Report&body=Please describe the ad you saw, including when and where it appeared in the app."
             );
           },
         },
