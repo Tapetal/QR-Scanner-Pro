@@ -1,279 +1,117 @@
-# QR Scanner & Brain Teaser App - Fixed Files
+# QR Scanner Pro
 
-## 🎯 Problem Solved
+A mobile app built with React Native and Expo that combines a QR code scanner and generator with daily brain teaser puzzles.
 
-Your original Anything.com app had these issues:
-- ❌ Only showed the puzzle/quiz tab
-- ❌ QR Scanner was hidden
-- ❌ Ads might not be configured correctly
-- ❌ Navigation issues
+## Features
 
-## ✅ What's Fixed
+- **QR Scanner** — Scan QR codes with your camera. Copy, share, or open URLs instantly. Scans are saved to history automatically.
+- **QR Generator** — Create QR codes for text, URLs, or WiFi credentials. Share them directly from the app.
+- **Daily Puzzles** — A new brain teaser every day across logic, math, and riddle categories. Includes hints, streak tracking, and achievement badges.
+- **History / Archive** — Browse all past scans and solved puzzles.
+- **Profile** — View your stats, streaks, and achievements.
 
-- ✅ **Both features now visible**: QR Scanner AND Brain Teaser puzzles
-- ✅ **Proper tab navigation**: 5 tabs (Scan, Generate, Puzzle, Archive, Profile)
-- ✅ **AdMob integration**: Banner ads + Interstitial ads properly configured
-- ✅ **Clean navigation**: Scanner is the default tab when app opens
-- ✅ **Complete functionality**: All features working together
+## Tech Stack
 
----
+- [Expo](https://expo.dev/) (React Native)
+- [Expo Router](https://expo.github.io/router/) — file-based navigation
+- TypeScript + JSX
+- AsyncStorage for local persistence
+- EAS Build for production builds
 
-## 📁 Files in This Package
+## Project Structure
 
 ```
-fixed-files/
+_/apps/mobile/
 ├── src/
 │   ├── app/
-│   │   ├── index.jsx                    [REPLACE] - Redirects to scanner
-│   │   └── (tabs)/
-│   │       ├── _layout.jsx              [REPLACE] - Shows all 5 tabs
-│   │       └── scanner.jsx              [NEW] - QR scanner screen
+│   │   ├── (tabs)/
+│   │   │   ├── scanner.jsx       # QR scanner screen
+│   │   │   ├── generate.jsx      # QR generator screen
+│   │   │   ├── puzzle.jsx        # Daily puzzle screen
+│   │   │   ├── history.jsx       # Scan & puzzle history
+│   │   │   ├── profile.jsx       # User stats & settings
+│   │   │   └── _layout.jsx       # Tab navigation layout
+│   │   ├── index.jsx             # Entry redirect
+│   │   ├── _layout.jsx           # Root layout
+│   │   └── +not-found.tsx        # 404 screen
+│   │
+│   ├── components/
+│   │   ├── AdBanner.jsx
+│   │   └── KeyboardAvoidingAnimatedView.jsx
+│   │
 │   └── utils/
-│       └── storage.js                   [NEW] - Storage helper
-├── SETUP_GUIDE.md                       [READ FIRST] - Complete setup guide
-├── APP_STRUCTURE.md                     [REFERENCE] - App architecture
-├── DEPLOYMENT_CHECKLIST.md              [USE] - Pre-launch checklist
-├── quick-setup.bat                      [RUN] - Windows setup script
-└── quick-setup.sh                       [RUN] - Mac/Linux setup script
+│       ├── auth/                 # Auth logic & hooks
+│       ├── storage.js            # AsyncStorage helpers
+│       ├── puzzleData.js         # Puzzle content
+│       ├── puzzleStorage.js      # Puzzle state persistence
+│       └── notifications.js     # Push notification helpers
+│
+├── assets/                       # Icons, images, fonts
+├── app.json                      # Expo config
+├── eas.json                      # EAS Build config
+└── package.json
 ```
 
----
+## Getting Started
 
-## 🚀 Quick Start (5 Minutes)
+### Prerequisites
 
-### Step 1: Copy Fixed Files
+- Node.js 18+
+- Expo CLI: `npm install -g expo-cli`
+- For Android: Android Studio + emulator or a physical device
+- For iOS: Xcode (macOS only) or a physical device with Expo Go
 
-**From your downloaded ANYTHING project folder:**
-
-1. Navigate to: `_/apps/mobile/`
-
-2. **Copy these files** (overwrite existing):
-
-```
-FROM fixed-files/src/app/index.jsx
-  TO _/apps/mobile/src/app/index.jsx
-
-FROM fixed-files/src/app/(tabs)/_layout.jsx
-  TO _/apps/mobile/src/app/(tabs)/_layout.jsx
-
-FROM fixed-files/src/app/(tabs)/scanner.jsx
-  TO _/apps/mobile/src/app/(tabs)/scanner.jsx (NEW FILE)
-
-FROM fixed-files/src/utils/storage.js
-  TO _/apps/mobile/src/utils/storage.js (NEW FILE)
-```
-
-### Step 2: Update AdMob IDs
-
-**You MUST update your real AdMob IDs in 3 files:**
-
-1. **`src/components/AdBanner.jsx`** - Lines 10-11
-2. **`src/app/(tabs)/scanner.jsx`** - Lines 23-24
-3. **`app.json`** - Lines in ios.infoPlist and plugins section
-
-Replace `ca-app-pub-XXXXXXXX/XXXXXXXX` with your actual IDs.
-
-### Step 3: Install & Run
+### Installation
 
 ```bash
-cd _/apps/mobile
+# Clone the repo
+git clone https://github.com/Tapetal/QR-Scanner-Pro.git
+cd QR-Scanner-Pro/_/apps/mobile
+
+# Install dependencies
 npm install
-npm run android
+
+# Start the dev server
+npx expo start
 ```
 
-That's it! Your app now has both QR Scanner and Puzzles! 🎉
+Then press `a` to open on Android or `i` for iOS.
 
----
+### Environment Variables
 
-## 📱 App Features
+Create a `.env` file in `_/apps/mobile/`:
 
-### Tab 1: Scanner (QR Code Scanner)
-- Scan QR codes with camera
-- Copy, share, or open URLs
-- Auto-saves to history
-- Banner ad at bottom
-- Interstitial ad every 3 scans
+```env
+EXPO_PUBLIC_API_URL=your_value
+```
 
-### Tab 2: Generate (QR Code Generator)
-- Create QR codes for:
-  - Plain text
-  - URLs
-  - WiFi credentials (with privacy consent)
-- Share generated codes
-- Banner ad at bottom
+> `.env` is gitignored and never committed.
 
-### Tab 3: Puzzle (Daily Brain Teaser)
-- Daily puzzle challenges
-- Hint system
-- Streak tracking
-- Achievement badges
-- Categories: Logic, Math, Riddles
-- Banner ad at bottom
+## Building for Production
 
-### Tab 4: Archive (Puzzle History)
-- View all solved puzzles
-- See answers and explanations
-- Track solve dates
-- View streak history
-- Banner ad at bottom
+This project uses [EAS Build](https://docs.expo.dev/build/introduction/).
 
-### Tab 5: Profile (Stats & Settings)
-- Current streak display
-- Total puzzles solved
-- Achievement badges
-- Daily notification toggle
-- Report inappropriate ads
-- Banner ad at bottom
-
----
-
-## 💰 Monetization
-
-### Banner Ads
-- Displayed at bottom of all 5 tabs
-- Adaptive size (fits all screen sizes)
-- Non-personalized ads (privacy-friendly)
-
-### Interstitial Ads
-- Full-screen ads
-- Shown after every 3 QR scans
-- Dismissible by user
-- Non-personalized ads
-
-**Current Setup:**
-- Using test ads in development (`__DEV__`)
-- Real ads in production (when you build APK/IPA)
-- **IMPORTANT:** Replace test IDs with your AdMob IDs!
-
----
-
-## 🔧 Configuration Required
-
-### 1. AdMob Account Setup
-1. Go to https://admob.google.com/
-2. Create an account
-3. Add your app
-4. Create ad units:
-   - **Banner Ad** (for all tabs)
-   - **Interstitial Ad** (for scanner)
-5. Copy the IDs and paste in the 3 files mentioned above
-
-### 2. App Identity
-Update these in `app.json`:
-- `name`: "Your App Name"
-- `slug`: "your-app-slug"
-- `android.package`: "com.tapetal.qrscannerapp"
-- `ios.bundleIdentifier`: "com.tapetal.qrscannerapp"
-
-### 3. App Icons
-Replace these files in `assets/images/`:
-- `icon.png` (1024x1024)
-- `adaptive-icon.png` (1024x1024)
-- `splash-icon.png` (1024x1024)
-
----
-
-## 🏗️ Building for Production
-
-### Option 1: EAS Build (Recommended)
 ```bash
 # Install EAS CLI
 npm install -g eas-cli
 
-# Login
+# Log in to your Expo account
 eas login
 
-# Build Android APK
+# Build for Android
 eas build --platform android --profile preview
 
-# Build iOS IPA (requires Apple Developer account)
+# Build for iOS
 eas build --platform ios --profile preview
 ```
 
-### Option 2: Local Android Build
-```bash
-cd android
-./gradlew assembleRelease
+## Permissions
 
-# Find APK at:
-# android/app/build/outputs/apk/release/app-release.apk
-```
+The app requires the following device permissions:
 
----
+- **Camera** — for scanning QR codes
+- **Notifications** — for daily puzzle reminders (optional)
 
-## ✅ Testing Checklist
+## License
 
-Before building for production:
-
-- [ ] All 5 tabs visible and working
-- [ ] QR scanner scans codes
-- [ ] QR generator creates codes
-- [ ] Puzzle loads daily challenge
-- [ ] Archive shows solved puzzles
-- [ ] Profile shows correct stats
-- [ ] Banner ads visible on all tabs
-- [ ] Interstitial ad shows after 3 scans
-- [ ] No crashes or errors
-- [ ] AdMob IDs updated with real IDs
-
----
-
-## 📚 Documentation
-
-- **SETUP_GUIDE.md** - Complete setup instructions
-- **APP_STRUCTURE.md** - Technical architecture
-- **DEPLOYMENT_CHECKLIST.md** - Pre-launch checklist
-
----
-
-## 🐛 Troubleshooting
-
-### Ads not showing?
-- Wait 24-48 hours after creating ad units
-- Check AdMob account is approved
-- Verify ad IDs are correct
-- Test on real device (not simulator)
-
-### Build fails?
-```bash
-rm -rf node_modules
-npm install
-cd android && ./gradlew clean && cd ..
-npx expo start --clear
-```
-
-### Camera not working?
-- Grant camera permission when prompted
-- Test on real device
-- Check AndroidManifest.xml has camera permission
-
----
-
-## 📞 Support
-
-If you encounter issues:
-
-1. Check the SETUP_GUIDE.md
-2. Review the DEPLOYMENT_CHECKLIST.md
-3. Check console logs for errors
-4. Verify all files copied correctly
-5. Ensure AdMob IDs are valid
-
----
-
-## 🎯 Next Steps
-
-1. ✅ Copy the 4 fixed files
-2. ✅ Update AdMob IDs (3 files)
-3. ✅ Run `npm install`
-4. ✅ Test with `npm run android`
-5. ✅ Build APK/IPA
-6. ✅ Submit to app stores
-
-**Good luck with your app! 🚀**
-
----
-
-## 📄 License
-
-This is a custom app built on Anything.com platform. Make sure to comply with their terms of service and any applicable licenses.
+[MIT](./LICENSE)
