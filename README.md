@@ -1,117 +1,111 @@
 # QR Scanner Pro
 
-A mobile app built with React Native and Expo that combines a QR code scanner and generator with daily brain teaser puzzles.
+QR Scanner Pro is a mobile QR utility and daily puzzle app. The repository also contains a companion web application with API routes.
 
-## Features
+## Mobile app
 
-- **QR Scanner** — Scan QR codes with your camera. Copy, share, or open URLs instantly. Scans are saved to history automatically.
-- **QR Generator** — Create QR codes for text, URLs, or WiFi credentials. Share them directly from the app.
-- **Daily Puzzles** — A new brain teaser every day across logic, math, and riddle categories. Includes hints, streak tracking, and achievement badges.
-- **History / Archive** — Browse all past scans and solved puzzles.
-- **Profile** — View your stats, streaks, and achievements.
+The mobile app is built with Expo, React Native, and Expo Router. It provides:
 
-## Tech Stack
+- **Scan:** Scan QR codes with the camera and keep a local scan history.
+- **Generate:** Create QR codes for text, URLs, and Wi-Fi credentials. Wi-Fi data is sent to the QR image service only after the app asks for consent.
+- **Daily puzzle:** Solve an offline daily riddle, use a hint, and track completed puzzles and streaks. Puzzle selection varies by installation and avoids recent repeats where possible.
+- **Archive:** Review saved scan and puzzle history.
+- **Profile and settings:** View puzzle stats, choose Light, Dark, or System appearance, and optionally schedule a daily 9 AM local-time puzzle reminder.
+- **Advertising:** Google AdMob banner ads are integrated into the app.
 
-- [Expo](https://expo.dev/) (React Native)
-- [Expo Router](https://expo.github.io/router/) — file-based navigation
-- TypeScript + JSX
-- AsyncStorage for local persistence
-- EAS Build for production builds
+Puzzle progress, scan history, and appearance and reminder preferences are stored locally on the device. Notification delivery depends on device permissions and operating-system settings. See the [Privacy Policy](./PRIVACY_POLICY.md) for details about data handling and third-party services.
 
-## Project Structure
+## Repository structure
 
-```
-_/apps/mobile/
-├── src/
-│   ├── app/
-│   │   ├── (tabs)/
-│   │   │   ├── scanner.jsx       # QR scanner screen
-│   │   │   ├── generate.jsx      # QR generator screen
-│   │   │   ├── puzzle.jsx        # Daily puzzle screen
-│   │   │   ├── history.jsx       # Scan & puzzle history
-│   │   │   ├── profile.jsx       # User stats & settings
-│   │   │   └── _layout.jsx       # Tab navigation layout
-│   │   ├── index.jsx             # Entry redirect
-│   │   ├── _layout.jsx           # Root layout
-│   │   └── +not-found.tsx        # 404 screen
-│   │
-│   ├── components/
-│   │   ├── AdBanner.jsx
-│   │   └── KeyboardAvoidingAnimatedView.jsx
-│   │
-│   └── utils/
-│       ├── auth/                 # Auth logic & hooks
-│       ├── storage.js            # AsyncStorage helpers
-│       ├── puzzleData.js         # Puzzle content
-│       ├── puzzleStorage.js      # Puzzle state persistence
-│       └── notifications.js     # Push notification helpers
-│
-├── assets/                       # Icons, images, fonts
-├── app.json                      # Expo config
-├── eas.json                      # EAS Build config
-└── package.json
+```text
+QR-Scanner-Pro/
+├── LICENSE
+├── PRIVACY_POLICY.md
+├── README.md
+└── _/
+    └── apps/
+        ├── mobile/                  # Expo React Native app
+        │   ├── assets/              # App icons, images, and fonts
+        │   ├── src/
+        │   │   ├── app/
+        │   │   │   ├── (tabs)/      # Scanner, generator, puzzle, archive, profile
+        │   │   │   ├── index.jsx    # Entry route
+        │   │   │   └── _layout.jsx  # Root providers and app lifecycle
+        │   │   ├── components/      # Shared UI components
+        │   │   └── utils/           # Storage, puzzles, themes, notifications, auth
+        │   ├── app.json             # Expo identity, plugins, Android SDK settings
+        │   ├── eas.json             # EAS build profiles
+        │   └── package.json
+        └── web/                     # React Router/Vite companion web app and API routes
+            ├── src/
+            │   └── app/             # Web routes, layouts, and API endpoints
+            ├── package.json
+            └── bun.lock
 ```
 
-## Getting Started
+## Technology
 
-### Prerequisites
+- **Mobile:** Expo SDK 54, React Native 0.81, Expo Router 6, JavaScript/JSX and TypeScript
+- **Android:** Expo Build Properties configures compile SDK 36 and target SDK 36; the application ID is `com.tapetal.qrscannerapp`
+- **Builds:** EAS Build; the production Android profile creates an Android App Bundle (AAB) and increments the remote Android version code
+- **Web:** React Router 7, Vite, and TypeScript; Bun is used for its lockfile
+- **Mobile persistence:** AsyncStorage
 
-- Node.js 18+
-- Expo CLI: `npm install -g expo-cli`
-- For Android: Android Studio + emulator or a physical device
-- For iOS: Xcode (macOS only) or a physical device with Expo Go
+Android native project files are generated during Expo prebuild and are ignored by Git. Persistent Android SDK settings belong in `_/apps/mobile/app.json`.
 
-### Installation
+## Develop the mobile app
+
+Requirements: Node.js and npm. For local native Android or iOS runs, install the corresponding platform tools; iOS native builds require macOS and Xcode.
 
 ```bash
-# Clone the repo
-git clone https://github.com/Tapetal/QR-Scanner-Pro.git
-cd QR-Scanner-Pro/_/apps/mobile
-
-# Install dependencies
-npm install
-
-# Start the dev server
+cd _/apps/mobile
+npm ci
 npx expo start
 ```
 
-Then press `a` to open on Android or `i` for iOS.
+Use the Expo CLI prompts to open the app on a device or emulator. For a local native Android run, use `npm run android` after setting up Android Studio and the Android SDK.
 
-### Environment Variables
-
-Create a `.env` file in `_/apps/mobile/`:
-
-```env
-EXPO_PUBLIC_API_URL=your_value
-```
-
-> `.env` is gitignored and never committed.
-
-## Building for Production
-
-This project uses [EAS Build](https://docs.expo.dev/build/introduction/).
+### Mobile tests
 
 ```bash
-# Install EAS CLI
-npm install -g eas-cli
-
-# Log in to your Expo account
-eas login
-
-# Build for Android
-eas build --platform android --profile preview
-
-# Build for iOS
-eas build --platform ios --profile preview
+cd _/apps/mobile
+npx jest --runInBand
 ```
 
-## Permissions
+### Production Android AAB
 
-The app requires the following device permissions:
+The production EAS profile runs Expo prebuild, uses remote Android app-version management, and produces an AAB:
 
-- **Camera** — for scanning QR codes
-- **Notifications** — for daily puzzle reminders (optional)
+```bash
+cd _/apps/mobile
+npx eas-cli@latest login
+npx eas-cli@latest build --platform android --profile production
+```
 
-## License
+Download the completed AAB from the EAS build page. Building does not upload or publish the app to Google Play. Before release, check the completed build and Play Console for the expected package name, version code, and target SDK.
 
-[MIT](./LICENSE)
+### Build environment and secrets
+
+EAS build-time environment values are configured in EAS and referenced by `eas.json`. Do not commit `.env` files, credentials, signing keys, or service secrets. Local environment files and generated Android/build output are ignored by Git.
+
+## Develop the web app
+
+The web application uses Bun and the committed `bun.lock`:
+
+```bash
+cd _/apps/web
+bun install
+bun run dev
+```
+
+To run its type check:
+
+```bash
+bun run typecheck
+```
+
+## More information
+
+- [Mobile app development and build notes](./_/apps/mobile/README.md)
+- [Privacy Policy](./PRIVACY_POLICY.md)
+- [MIT License](./LICENSE)
