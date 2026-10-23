@@ -1,24 +1,26 @@
 import { Tabs } from "expo-router";
 import { Camera, QrCode, Brain, Archive, User } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "../../utils/ThemeProvider";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#ffffff",
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderColor: "#e5e7eb",
+          borderColor: colors.border,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 5,
           paddingTop: 5,
         },
-        tabBarActiveTintColor: "#8b5cf6",
-        tabBarInactiveTintColor: "#9ca3af",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.mutedText,
       }}
     >
       {/* QR Scanner Tab */}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Modal,
@@ -21,6 +20,7 @@ import {
 } from "react-native-google-mobile-ads";
 import mobileAds from 'react-native-google-mobile-ads';
 import AdBanner from "../../components/AdBanner";
+import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
 // CRITICAL: Initialize AdMob
 mobileAds()
@@ -72,6 +72,8 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
 
 function ScanScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [result, setResult] = useState(null);
@@ -232,7 +234,7 @@ function ScanScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Scan Result</Text>
               <TouchableOpacity onPress={handleClose}>
-                <X size={24} color="#000" />
+                <X size={24} color={colors.primaryText} />
               </TouchableOpacity>
             </View>
 
@@ -269,7 +271,7 @@ function ScanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
@@ -278,6 +280,7 @@ const styles = StyleSheet.create({
   },
   centered: {
     flex: 1,
+    backgroundColor: colors.background,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -286,9 +289,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     fontSize: 16,
+    color: colors.primaryText,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -339,22 +343,23 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
+    color: colors.primaryText,
   },
   resultContainer: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceSecondary,
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
   },
   resultType: {
     fontSize: 12,
-    color: "#666",
+    color: colors.secondaryText,
     marginBottom: 5,
     textTransform: "uppercase",
   },
   resultText: {
     fontSize: 16,
-    color: "#000",
+    color: colors.primaryText,
   },
   actionButtons: {
     flexDirection: "row",

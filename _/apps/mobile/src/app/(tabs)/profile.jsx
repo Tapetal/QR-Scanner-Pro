@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   ScrollView,
   Switch,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
@@ -20,11 +20,13 @@ import {
   cancelDailyNotification,
 } from "../../utils/notifications";
 import AdBanner from "../../components/AdBanner";
+import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
 const NOTIFICATION_ENABLED_KEY = "notifications_enabled";
 
 function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { colors, preference, setPreference } = useTheme();
   const [streak, setStreak] = useState(0);
   const [totalSolved, setTotalSolved] = useState(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -47,25 +49,55 @@ function ProfileScreen() {
 
   const handleToggleNotifications = async (value) => {
     if (value) {
-      const hasPermission = await requestNotificationPermissions();
-      if (hasPermission) {
+      try {
+        const permission = await requestNotificationPermissions();
+        if (!permission.granted) {
+          Alert.alert(
+            "Notifications unavailable",
+            permission.canAskAgain
+              ? "Notification permission is required to schedule the 9 AM reminder."
+              : Platform.OS === "web"
+                ? "Daily reminders are not available in this browser. Enable them in the mobile app."
+                : "Notifications are blocked in system settings. Enable them there to receive the daily reminder.",
+            permission.canAskAgain || Platform.OS === "web"
+              ? [{ text: "OK" }]
+              : [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Open Settings",
+                    onPress: () => Linking.openSettings(),
+                  },
+                ],
+          );
+          return;
+        }
+
         await scheduleDailyNotification();
         await AsyncStorage.setItem(NOTIFICATION_ENABLED_KEY, "true");
         setNotificationsEnabled(true);
         Alert.alert(
           "Notifications Enabled",
-          "You'll receive a daily reminder at 9 AM to solve your puzzle!",
+          "Your daily quiz reminder is scheduled for 9 AM local time. Delivery can vary with device settings.",
         );
-      } else {
+      } catch (error) {
+        console.error("Unable to enable daily reminder:", error);
         Alert.alert(
-          "Permission Denied",
-          "Please enable notifications in your device settings to receive daily reminders.",
+          "Reminder could not be scheduled",
+          "Please check your notification settings and try again.",
         );
       }
     } else {
-      await cancelDailyNotification();
-      await AsyncStorage.setItem(NOTIFICATION_ENABLED_KEY, "false");
-      setNotificationsEnabled(false);
+      try {
+        await cancelDailyNotification();
+        await AsyncStorage.setItem(NOTIFICATION_ENABLED_KEY, "false");
+        setNotificationsEnabled(false);
+      } catch (error) {
+        console.error("Unable to cancel daily reminder:", error);
+        Alert.alert(
+          "Reminder could not be canceled",
+          "Please try again. Your reminder setting has not been changed.",
+        );
+      }
     }
   };
 
@@ -96,17 +128,17 @@ function ProfileScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
-      <StatusBar style="dark" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={colors.statusBar} />
 
       <View
         style={{
           paddingTop: insets.top + 20,
           paddingHorizontal: 20,
           paddingBottom: 15,
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderBottomWidth: 1,
-          borderBottomColor: "#f0f0f0",
+          borderBottomColor: colors.border,
         }}
       >
         <Text style={{ fontSize: 28, fontWeight: "bold" }}>Profile</Text>
@@ -149,7 +181,7 @@ function ProfileScreen() {
                   width: 48,
                   height: 48,
                   borderRadius: 24,
-                  backgroundColor: "#fff",
+                  backgroundColor: colors.surface,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -225,7 +257,7 @@ function ProfileScreen() {
         {/* Settings Card */}
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: colors.surface,
             borderRadius: 16,
             overflow: "hidden",
             marginBottom: 20,
@@ -235,10 +267,65 @@ function ProfileScreen() {
             style={{
               padding: 16,
               borderBottomWidth: 1,
-              borderBottomColor: "#f0f0f0",
+              borderBottomColor: colors.border,
             }}
           >
             <Text style={{ fontSize: 18, fontWeight: "bold" }}>Settings</Text>
+          </View>
+
+          <View
+            style={{
+              padding: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 12 }}>
+              Appearance
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {[
+                ["light", "Light"],
+                ["dark", "Dark"],
+                ["system", "System"],
+              ].map(([value, label]) => (
+                <TouchableOpacity
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: preference === value }}
+                  onPress={() => {
+                    setPreference(value).catch((error) => {
+                      console.error("Unable to save theme preference:", error);
+                      Alert.alert(
+                        "Theme could not be saved",
+                        "Please try changing the appearance setting again.",
+                      );
+                    });
+                  }}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    alignItems: "center",
+                    backgroundColor:
+                      preference === value
+                        ? colors.primary
+                        : colors.surfaceSecondary,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color:
+                        preference === value ? "#ffffff" : colors.primaryText,
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View
@@ -248,18 +335,18 @@ function ProfileScreen() {
               justifyContent: "space-between",
               padding: 16,
               borderBottomWidth: 1,
-              borderBottomColor: "#f0f0f0",
+              borderBottomColor: colors.border,
             }}
           >
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
             >
-              <Bell size={24} color="#6b7280" />
+              <Bell size={24} color={colors.secondaryText} />
               <View>
                 <Text style={{ fontSize: 16, fontWeight: "600" }}>
                   Daily Reminder
                 </Text>
-                <Text style={{ fontSize: 14, color: "#6b7280" }}>
+                <Text style={{ fontSize: 14, color: colors.secondaryText }}>
                   Get notified at 9 AM
                 </Text>
               </View>
@@ -281,12 +368,12 @@ function ProfileScreen() {
             }}
             onPress={handleReportAd}
           >
-            <Flag size={24} color="#6b7280" />
+            <Flag size={24} color={colors.secondaryText} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16, fontWeight: "600" }}>
                 Report Inappropriate Ad
               </Text>
-              <Text style={{ fontSize: 14, color: "#6b7280" }}>
+              <Text style={{ fontSize: 14, color: colors.secondaryText }}>
                 Help us maintain ad quality
               </Text>
             </View>
@@ -296,7 +383,7 @@ function ProfileScreen() {
         {/* Achievement Badges Info */}
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: colors.surface,
             padding: 20,
             borderRadius: 16,
           }}
@@ -311,19 +398,19 @@ function ProfileScreen() {
             Achievement Badges
           </Text>
           <View style={{ gap: 12 }}>
-            <Text style={{ fontSize: 14, color: "#6b7280" }}>
+            <Text style={{ fontSize: 14, color: colors.secondaryText }}>
               🌱 Beginner - Start your journey
             </Text>
-            <Text style={{ fontSize: 14, color: "#6b7280" }}>
+            <Text style={{ fontSize: 14, color: colors.secondaryText }}>
               ✨ Getting Started - 3 day streak
             </Text>
-            <Text style={{ fontSize: 14, color: "#6b7280" }}>
+            <Text style={{ fontSize: 14, color: colors.secondaryText }}>
               ⭐ Week Warrior - 7 day streak
             </Text>
-            <Text style={{ fontSize: 14, color: "#6b7280" }}>
+            <Text style={{ fontSize: 14, color: colors.secondaryText }}>
               🔥 On Fire - 14 day streak
             </Text>
-            <Text style={{ fontSize: 14, color: "#6b7280" }}>
+            <Text style={{ fontSize: 14, color: colors.secondaryText }}>
               🏆 Legend - 30 day streak
             </Text>
           </View>

@@ -8,9 +8,10 @@ import {
   useSitemap,
 } from 'expo-router';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ErrorBoundaryWrapper } from '../../__create/SharedErrorBoundary';
+import { ThemedText as Text, useTheme } from '../utils/ThemeProvider';
 
 interface ParentSitemap {
   expoPages?: Array<{
@@ -22,6 +23,8 @@ interface ParentSitemap {
 }
 
 function NotFoundScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const params = useGlobalSearchParams();
   const expoSitemap = useSitemap();
@@ -227,14 +230,23 @@ function NotFoundScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: {
+  background: string;
+  surface: string;
+  surfaceSecondary: string;
+  primaryText: string;
+  secondaryText: string;
+  mutedText: string;
+  border: string;
+  primary: string;
+}) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   contentContainer: {
     flexGrow: 1,
@@ -257,9 +269,9 @@ const styles = StyleSheet.create({
     height: 32,
     width: 300,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.surfaceSecondary,
     overflow: 'hidden',
   },
   pathPrefix: {
@@ -267,10 +279,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     justifyContent: 'center',
     borderRightWidth: 1,
-    borderRightColor: '#e5e5e5',
+    borderRightColor: colors.border,
   },
   pathPrefixText: {
-    color: '#666',
+    color: colors.secondaryText,
   },
   pathContent: {
     flex: 1,
@@ -278,7 +290,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pathText: {
-    color: '#666',
+    color: colors.secondaryText,
   },
   mainContent: {
     flex: 1,
@@ -289,14 +301,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '500',
-    color: '#111',
+    color: colors.primaryText,
     marginBottom: 16,
     textAlign: 'center',
   },
   subtitle: {
     paddingTop: 16,
     paddingBottom: 48,
-    color: '#666',
+    color: colors.secondaryText,
     textAlign: 'center',
     fontSize: 16,
     lineHeight: 24,
@@ -305,7 +317,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   routesLabel: {
-    color: '#666',
+    color: colors.secondaryText,
     marginBottom: 80,
     textAlign: 'center',
   },
@@ -319,10 +331,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     gap: 15,
   },
   createPageTextContainer: {
@@ -330,13 +342,13 @@ const styles = StyleSheet.create({
   },
   createPageTitle: {
     fontSize: 14,
-    color: '#000',
+    color: colors.primaryText,
     fontWeight: '500',
     textAlign: 'center',
   },
   createPageDescription: {
     fontSize: 14,
-    color: '#666',
+    color: colors.secondaryText,
     textAlign: 'center',
   },
   createPageButtonContainer: {
@@ -344,7 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   createPageButton: {
-    backgroundColor: '#000',
+    backgroundColor: colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
@@ -362,7 +374,7 @@ const styles = StyleSheet.create({
   },
   pagesLabel: {
     fontSize: 14,
-    color: '#ccc',
+    color: colors.mutedText,
     alignSelf: 'flex-start',
     marginBottom: 10,
     paddingHorizontal: 16,
@@ -378,20 +390,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
     elevation: 1,
   },
   routeName: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111',
+    color: colors.primaryText,
   },
   routePath: {
     fontSize: 14,
-    color: '#999',
+    color: colors.mutedText,
   },
 
   routesContainer: {
@@ -415,16 +427,16 @@ const styles = StyleSheet.create({
     aspectRatio: 1.4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     overflow: 'hidden',
   },
   routePreview: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.surfaceSecondary,
   },
   routeLabel: {
     paddingTop: 12,
-    color: '#666',
+    color: colors.secondaryText,
     textAlign: 'left',
     width: '100%',
   },

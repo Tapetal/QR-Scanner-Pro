@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
+import { View, FlatList, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { Trash2, Trophy, Calendar } from "lucide-react-native";
@@ -7,9 +7,11 @@ import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getSolvedPuzzles } from "../../utils/puzzleStorage";
 import AdBanner from "../../components/AdBanner";
+import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
 function ArchiveScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [solvedPuzzles, setSolvedPuzzles] = useState([]);
 
   useFocusEffect(
@@ -57,7 +59,7 @@ function ArchiveScreen() {
     return (
       <View
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           padding: 16,
           borderRadius: 12,
           marginBottom: 12,
@@ -81,7 +83,7 @@ function ArchiveScreen() {
               style={{
                 fontSize: 16,
                 fontWeight: "600",
-                color: "#1f2937",
+                color: colors.primaryText,
                 marginBottom: 6,
               }}
             >
@@ -127,7 +129,7 @@ function ArchiveScreen() {
               style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
             >
               <Calendar size={14} color="#9ca3af" />
-              <Text style={{ fontSize: 12, color: "#6b7280" }}>
+              <Text style={{ fontSize: 12, color: colors.secondaryText }}>
                 {new Date(item.solvedAt).toLocaleDateString()}
               </Text>
             </View>
@@ -136,7 +138,7 @@ function ArchiveScreen() {
 
         <View
           style={{
-            backgroundColor: "#f9fafb",
+            backgroundColor: colors.surfaceSecondary,
             padding: 12,
             borderRadius: 8,
             marginTop: 8,
@@ -146,7 +148,7 @@ function ArchiveScreen() {
             style={{
               fontSize: 12,
               fontWeight: "600",
-              color: "#6b7280",
+              color: colors.secondaryText,
               marginBottom: 4,
             }}
           >
@@ -156,7 +158,7 @@ function ArchiveScreen() {
             style={{
               fontSize: 14,
               fontWeight: "500",
-              color: "#1f2937",
+              color: colors.primaryText,
             }}
           >
             {item.answer}
@@ -167,17 +169,17 @@ function ArchiveScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
-      <StatusBar style="dark" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={colors.statusBar} />
 
       <View
         style={{
           paddingTop: insets.top + 20,
           paddingHorizontal: 20,
           paddingBottom: 15,
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderBottomWidth: 1,
-          borderBottomColor: "#f0f0f0",
+          borderBottomColor: colors.border,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -204,7 +206,7 @@ function ArchiveScreen() {
             <Trophy size={48} color="#d1d5db" />
             <Text
               style={{
-                color: "#9ca3af",
+                color: colors.mutedText,
                 fontSize: 16,
                 marginTop: 16,
                 textAlign: "center",

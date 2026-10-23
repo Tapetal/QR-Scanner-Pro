@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+	Appearance,
 	View,
 	Text,
 	Modal,
@@ -97,7 +98,10 @@ const Alert = {
 				...button,
 				onPress: button.onPress || (() => {}),
 			})),
-			userInterfaceStyle: userInterfaceStyle?.userInterfaceStyle || 'light',
+			userInterfaceStyle:
+				userInterfaceStyle?.userInterfaceStyle ||
+				Appearance.getColorScheme() ||
+				'light',
 		};
 		if (setGlobalAlert) {
 			setGlobalAlert({ ...globalAlertData });
@@ -126,7 +130,10 @@ const Alert = {
 			type: type || 'plain-text',
 			defaultValue: defaultValue || '',
 			keyboardType: keyboardType || 'default',
-			userInterfaceStyle: userInterfaceStyle?.userInterfaceStyle || 'light',
+			userInterfaceStyle:
+				userInterfaceStyle?.userInterfaceStyle ||
+				Appearance.getColorScheme() ||
+				'light',
 		};
 		if (setGlobalPrompt) {
 			setGlobalPrompt({ ...globalPromptData });

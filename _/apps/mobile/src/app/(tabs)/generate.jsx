@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import { Type, Link, Wifi, AlertCircle } from "lucide-react-native";
 import { Share } from "react-native";
 import AdBanner from "../../components/AdBanner";
 import KeyboardAvoidingAnimatedView from "../../components/KeyboardAvoidingAnimatedView";
+import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
 const TYPES = [
   { id: "text", label: "Text", icon: Type },
@@ -24,6 +24,8 @@ const TYPES = [
 
 function GenerateScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [activeType, setActiveType] = useState("text");
   const [content, setContent] = useState("");
   const [ssid, setSsid] = useState("");
@@ -91,7 +93,9 @@ function GenerateScreen() {
   };
 
   return (
-    <KeyboardAvoidingAnimatedView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <KeyboardAvoidingAnimatedView
+      style={{ flex: 1, backgroundColor: colors.background }}
+    >
       <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Generate QR</Text>
       </View>
@@ -117,7 +121,9 @@ function GenerateScreen() {
             >
               <type.icon
                 size={18}
-                color={activeType === type.id ? "#fff" : "#666"}
+                color={
+                  activeType === type.id ? "#fff" : colors.secondaryText
+                }
               />
               <Text
                 style={[
@@ -146,7 +152,8 @@ function GenerateScreen() {
                 value={ssid}
                 onChangeText={setSsid}
                 placeholder="e.g. MyHomeWiFi"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.mutedText}
+                selectionColor={colors.primary}
               />
               <Text style={styles.label}>Password</Text>
               <TextInput
@@ -154,7 +161,8 @@ function GenerateScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="WiFi Password"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.mutedText}
+                selectionColor={colors.primary}
                 secureTextEntry
               />
             </>
@@ -172,7 +180,8 @@ function GenerateScreen() {
                     ? "https://example.com"
                     : "Enter text here"
                 }
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.mutedText}
+                selectionColor={colors.primary}
                 multiline={activeType === "text"}
               />
             </>
@@ -254,13 +263,13 @@ function GenerateScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingBottom: 15,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
@@ -268,7 +277,7 @@ const styles = StyleSheet.create({
   },
   typeSelector: {
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.border,
   },
   typeScroll: {
     paddingHorizontal: 20,
@@ -281,16 +290,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceSecondary,
     gap: 6,
   },
   activeTypeBtn: {
-    backgroundColor: "#000",
+    backgroundColor: colors.primary,
   },
   typeText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#666",
+    color: colors.secondaryText,
   },
   activeTypeText: {
     color: "#fff",
@@ -305,16 +314,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 8,
-    color: "#333",
+    color: colors.primaryText,
   },
   input: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: "#e5e5e5",
+    borderColor: colors.border,
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
     marginBottom: 20,
+    color: colors.primaryText,
   },
   textArea: {
     minHeight: 100,
@@ -334,11 +344,11 @@ const styles = StyleSheet.create({
   resultContainer: {
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   qrWrapper: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -354,7 +364,7 @@ const styles = StyleSheet.create({
   shareBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 30,
@@ -373,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   consentModal: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 24,
     width: "100%",
@@ -388,12 +398,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 16,
-    color: "#000",
+    color: colors.primaryText,
   },
   consentText: {
     fontSize: 15,
     lineHeight: 22,
-    color: "#333",
+    color: colors.secondaryText,
     marginBottom: 12,
     textAlign: "center",
   },
@@ -413,15 +423,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   declineBtn: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
   },
   acceptBtn: {
     backgroundColor: "#2563eb",
   },
   declineBtnText: {
-    color: "#666",
+    color: colors.secondaryText,
     fontSize: 16,
     fontWeight: "600",
   },

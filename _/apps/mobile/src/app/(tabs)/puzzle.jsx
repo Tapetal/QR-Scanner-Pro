@@ -1,45 +1,100 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  AppState,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { Lightbulb, CheckCircle, Trophy, Flame } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 import { puzzles } from "../../utils/puzzleData";
 import {
-  getCurrentPuzzleIndex,
+  getDailyPuzzle,
+  setDailyPuzzleHintVisible,
   markPuzzleSolved,
   getStreak,
   canSolveToday,
-  incrementPuzzleIndex,
 } from "../../utils/puzzleStorage";
 import AdBanner from "../../components/AdBanner";
+import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
 function PuzzleScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
+  const [dailyDateKey, setDailyDateKey] = useState(null);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [streak, setStreak] = useState(0);
   const [canSolve, setCanSolve] = useState(true);
 
+  const loadPuzzle = useCallback(async () => {
+    try {
+      const daily = await getDailyPuzzle(puzzles);
+      setCurrentPuzzle(daily.puzzle);
+      setDailyDateKey(daily.dateKey);
+
+      const currentStreak = await getStreak();
+      setStreak(currentStreak);
+
+      const canSolveNow = await canSolveToday();
+      setCanSolve(canSolveNow);
+      setShowHint(canSolveNow && daily.hintVisible);
+      setShowAnswer(!canSolveNow || daily.completed);
+    } catch (error) {
+      console.error("Unable to load today's puzzle:", error);
+      Alert.alert(
+        "Puzzle unavailable",
+        "The daily puzzle could not be loaded. Please try again.",
+      );
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadPuzzle();
-    }, []),
+    }, [loadPuzzle]),
   );
 
-  const loadPuzzle = async () => {
-    const index = await getCurrentPuzzleIndex();
-    const puzzleIndex = index % puzzles.length;
-    setCurrentPuzzle(puzzles[puzzleIndex]);
+  useEffect(() => {
+    const refreshOnReturn = AppState.addEventListener("change", (state) => {
+      if (state === "active") loadPuzzle();
+    });
+    let timeout;
+    const scheduleNextMidnightRefresh = () => {
+      const now = new Date();
+      const midnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+      );
+      timeout = setTimeout(() => {
+        loadPuzzle();
+        scheduleNextMidnightRefresh();
+      }, midnight.getTime() - now.getTime());
+    };
+    scheduleNextMidnightRefresh();
 
-    const currentStreak = await getStreak();
-    setStreak(currentStreak);
+    return () => {
+      refreshOnReturn.remove();
+      clearTimeout(timeout);
+    };
+  }, [loadPuzzle]);
 
-    const canSolveNow = await canSolveToday();
-    setCanSolve(canSolveNow);
-    setShowHint(false);
-    setShowAnswer(!canSolveNow);
+  const toggleHint = async () => {
+    const nextValue = !showHint;
+    setShowHint(nextValue);
+    if (dailyDateKey) {
+      try {
+        await setDailyPuzzleHintVisible(dailyDateKey, nextValue);
+      } catch (error) {
+        console.error("Unable to save puzzle progress:", error);
+        Alert.alert("Progress could not be saved", "Please try again.");
+      }
+    }
   };
 
   const handleSolved = async () => {
@@ -48,27 +103,30 @@ function PuzzleScreen() {
       return;
     }
 
-    const result = await markPuzzleSolved(currentPuzzle);
-    setStreak(result.streak);
-    setShowAnswer(true);
-    setCanSolve(false);
+    try {
+      const result = await markPuzzleSolved(currentPuzzle);
+      setStreak(result.streak);
+      setShowAnswer(true);
+      setCanSolve(false);
 
-    Alert.alert(
-      "Well Done! 🎉",
-      `Streak: ${result.streak} day${result.streak !== 1 ? "s" : ""}!`,
-      [{ text: "Great!" }],
-    );
-  };
-
-  const handleNextPuzzle = async () => {
-    await incrementPuzzleIndex();
-    loadPuzzle();
+      Alert.alert(
+        "Well Done! 🎉",
+        `Streak: ${result.streak} day${result.streak !== 1 ? "s" : ""}!`,
+        [{ text: "Great!" }],
+      );
+    } catch (error) {
+      console.error("Unable to save solved puzzle:", error);
+      Alert.alert(
+        "Progress could not be saved",
+        "Your puzzle has not been marked complete. Please try again.",
+      );
+    }
   };
 
   if (!currentPuzzle) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#fff" }}>
-        <StatusBar style="dark" />
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar style={colors.statusBar} />
       </View>
     );
   }
@@ -82,17 +140,17 @@ function PuzzleScreen() {
   const categoryColor = categoryColors[currentPuzzle.category] || "#6b7280";
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
-      <StatusBar style="dark" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={colors.statusBar} />
 
       <View
         style={{
           paddingTop: insets.top + 20,
           paddingHorizontal: 20,
           paddingBottom: 15,
-          backgroundColor: "#fff",
+          backgroundColor: colors.surface,
           borderBottomWidth: 1,
-          borderBottomColor: "#f0f0f0",
+          borderBottomColor: colors.border,
         }}
       >
         <Text style={{ fontSize: 28, fontWeight: "bold", marginBottom: 10 }}>
@@ -136,7 +194,7 @@ function PuzzleScreen() {
       >
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: colors.surface,
             padding: 24,
             borderRadius: 16,
             marginBottom: 20,
@@ -152,7 +210,7 @@ function PuzzleScreen() {
               fontSize: 20,
               fontWeight: "600",
               lineHeight: 28,
-              color: "#1f2937",
+              color: colors.primaryText,
             }}
           >
             {currentPuzzle.question}
@@ -161,9 +219,9 @@ function PuzzleScreen() {
 
         {!showAnswer && (
           <TouchableOpacity
-            onPress={() => setShowHint(!showHint)}
+            onPress={toggleHint}
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: colors.surface,
               padding: 16,
               borderRadius: 12,
               flexDirection: "row",
@@ -171,7 +229,7 @@ function PuzzleScreen() {
               gap: 12,
               marginBottom: 20,
               borderWidth: 2,
-              borderColor: showHint ? "#fbbf24" : "#e5e7eb",
+              borderColor: showHint ? "#fbbf24" : colors.border,
             }}
           >
             <Lightbulb size={24} color={showHint ? "#fbbf24" : "#9ca3af"} />
@@ -179,7 +237,7 @@ function PuzzleScreen() {
               style={{
                 fontSize: 16,
                 fontWeight: "600",
-                color: showHint ? "#fbbf24" : "#6b7280",
+                color: showHint ? "#fbbf24" : colors.secondaryText,
                 flex: 1,
               }}
             >
@@ -191,7 +249,7 @@ function PuzzleScreen() {
         {showHint && !showAnswer && (
           <View
             style={{
-              backgroundColor: "#fffbeb",
+              backgroundColor: colors.hintSurface,
               padding: 16,
               borderRadius: 12,
               marginBottom: 20,
@@ -199,7 +257,7 @@ function PuzzleScreen() {
               borderLeftColor: "#fbbf24",
             }}
           >
-            <Text style={{ fontSize: 16, color: "#92400e", lineHeight: 24 }}>
+            <Text style={{ fontSize: 16, color: colors.hintText, lineHeight: 24 }}>
               💡 {currentPuzzle.hint}
             </Text>
           </View>
@@ -276,7 +334,7 @@ function PuzzleScreen() {
             {!canSolve && (
               <View
                 style={{
-                  backgroundColor: "#fef3c7",
+                  backgroundColor: colors.warningSurface,
                   padding: 16,
                   borderRadius: 12,
                   alignItems: "center",
@@ -287,7 +345,7 @@ function PuzzleScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: "#92400e",
+                    color: colors.hintText,
                     marginTop: 8,
                   }}
                 >

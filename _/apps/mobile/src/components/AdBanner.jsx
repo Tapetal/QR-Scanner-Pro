@@ -6,19 +6,7 @@ import {
   TestIds,
 } from "react-native-google-mobile-ads";
 import mobileAds from 'react-native-google-mobile-ads';
-
-// CRITICAL: Initialize AdMob - Must be called before any ads load!
-useEffect(() => {
-  mobileAds()
-    .initialize()
-    .then(adapterStatuses => {
-      console.log('✅ AdMob initialized successfully');
-      console.log('Adapter statuses:', adapterStatuses);
-    })
-    .catch(error => {
-      console.error('❌ AdMob initialization failed:', error);
-    });
-}, []);
+import { useTheme } from '../utils/ThemeProvider';
 
 // YOUR ACTUAL AD UNIT IDs FROM ADMOB
 // Go to: https://apps.admob.google.com/ → QR Scanner Pro → Ad units → "Home Screen Banner"
@@ -33,8 +21,27 @@ const adUnitId = Platform.select({
 });
 
 export default function AdBanner() {
+  const { colors } = useTheme();
+
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then((adapterStatuses) => {
+        console.log("AdMob initialized successfully");
+        console.log("Adapter statuses:", adapterStatuses);
+      })
+      .catch((error) => {
+        console.error("AdMob initialization failed:", error);
+      });
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+      ]}
+    >
       <BannerAd
         unitId={adUnitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}

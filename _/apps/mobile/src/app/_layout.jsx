@@ -5,7 +5,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { View } from 'react-native';
+import { AppState, View } from 'react-native';
+import { ThemeProvider } from '@/utils/ThemeProvider';
+import { restoreDailyNotification } from '@/utils/notifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,9 +41,19 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (isReady) {
-      SplashScreen.hideAsync();
-    }
+    if (!isReady) return undefined;
+
+    const restoreReminder = () => {
+      restoreDailyNotification().catch((error) => {
+        console.error('Unable to restore daily reminder:', error);
+      });
+    };
+
+    restoreReminder();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') restoreReminder();
+    });
+    return () => subscription.remove();
   }, [isReady]);
 
   if (!isReady) {
@@ -51,7 +63,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <ThemeProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </ThemeProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );
