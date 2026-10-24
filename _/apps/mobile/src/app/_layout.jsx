@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppState, View } from 'react-native';
 import { ThemeProvider } from '@/utils/ThemeProvider';
 import { restoreDailyNotification } from '@/utils/notifications';
+import { initializeMobileAds } from '@/utils/mobileAds';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +39,12 @@ export default function RootLayout() {
       }
     }, 5000);
     return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    initializeMobileAds().catch((error) => {
+      console.error('Unable to initialize mobile ads:', error);
+    });
   }, []);
 
   useEffect(() => {

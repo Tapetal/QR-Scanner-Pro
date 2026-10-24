@@ -51,6 +51,15 @@ export const getLastSolved = async () => {
 export const getSolvedPuzzles = async () =>
   readJson(SOLVED_PUZZLES_KEY, []);
 
+const wasPuzzleSolvedOnDate = (item, puzzleId, dateKey) => {
+  if (String(item.id) !== String(puzzleId)) return false;
+  if (item.dailyDateKey) return item.dailyDateKey === dateKey;
+  return (
+    item.solvedAt &&
+    getLocalDateKey(new Date(item.solvedAt)) === dateKey
+  );
+};
+
 export const getDailyPuzzle = async (puzzleBank, now = new Date()) => {
   if (!puzzleBank.length) {
     throw new Error("The puzzle bank is empty; a daily puzzle cannot be selected.");
@@ -86,8 +95,20 @@ export const getDailyPuzzle = async (puzzleBank, now = new Date()) => {
   }
 
   let state = await readJson(DAILY_STATE_KEY, null);
+  const solved = await getSolvedPuzzles();
+  const alreadySolved = solved.some((item) =>
+    wasPuzzleSolvedOnDate(item, puzzleId, dateKey),
+  );
   if (!state || state.dateKey !== dateKey || String(state.puzzleId) !== String(puzzleId)) {
-    state = { dateKey, puzzleId, hintVisible: false, completed: false };
+    state = {
+      dateKey,
+      puzzleId,
+      hintVisible: false,
+      completed: alreadySolved,
+    };
+    await AsyncStorage.setItem(DAILY_STATE_KEY, JSON.stringify(state));
+  } else if (alreadySolved && !state.completed) {
+    state = { ...state, completed: true, hintVisible: false };
     await AsyncStorage.setItem(DAILY_STATE_KEY, JSON.stringify(state));
   }
 
@@ -114,11 +135,7 @@ const saveSolvedPuzzle = async (puzzle, now) => {
   const dateKey = getLocalDateKey(now);
   const solved = await getSolvedPuzzles();
   const alreadySolved = solved.find(
-    (item) =>
-      item.dailyDateKey === dateKey ||
-      (!item.dailyDateKey &&
-        item.solvedAt &&
-        getLocalDateKey(new Date(item.solvedAt)) === dateKey),
+    (item) => wasPuzzleSolvedOnDate(item, puzzle.id, dateKey),
   );
 
   if (alreadySolved) {
@@ -180,14 +197,10 @@ const isYesterday = (date1, date2) => {
   return isSameDay(date1, yesterday);
 };
 
-export const canSolveToday = async (now = new Date()) => {
+export const canSolveToday = async (puzzle, now = new Date()) => {
   const dateKey = getLocalDateKey(now);
   const solved = await getSolvedPuzzles();
-  return !solved.some(
-    (item) =>
-      item.dailyDateKey === dateKey ||
-      (!item.dailyDateKey &&
-        item.solvedAt &&
-        getLocalDateKey(new Date(item.solvedAt)) === dateKey),
+  return !solved.some((item) =>
+    wasPuzzleSolvedOnDate(item, puzzle.id, dateKey),
   );
 };
