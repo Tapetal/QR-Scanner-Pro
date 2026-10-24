@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   AppState,
   View,
+  TextInput,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -16,8 +17,8 @@ import {
   setDailyPuzzleHintVisible,
   markPuzzleSolved,
   getStreak,
-  canSolveToday,
 } from "../../utils/puzzleStorage";
+import { isPuzzleAnswerCorrect } from "../../utils/puzzleAnswers";
 import AdBanner from "../../components/AdBanner";
 import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
 
@@ -28,22 +29,29 @@ function PuzzleScreen() {
   const [dailyDateKey, setDailyDateKey] = useState(null);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [answerInput, setAnswerInput] = useState("");
+  const activePuzzleKey = useRef(null);
   const [streak, setStreak] = useState(0);
   const [canSolve, setCanSolve] = useState(true);
 
   const loadPuzzle = useCallback(async () => {
     try {
       const daily = await getDailyPuzzle(puzzles);
+      const puzzleKey = `${daily.dateKey}:${daily.puzzle.id}`;
+      if (activePuzzleKey.current !== puzzleKey) {
+        activePuzzleKey.current = puzzleKey;
+        setAnswerInput("");
+      }
       setCurrentPuzzle(daily.puzzle);
       setDailyDateKey(daily.dateKey);
 
       const currentStreak = await getStreak();
       setStreak(currentStreak);
 
-      const canSolveNow = await canSolveToday();
+      const canSolveNow = !daily.completed;
       setCanSolve(canSolveNow);
       setShowHint(canSolveNow && daily.hintVisible);
-      setShowAnswer(!canSolveNow || daily.completed);
+      setShowAnswer(daily.completed);
     } catch (error) {
       console.error("Unable to load today's puzzle:", error);
       Alert.alert(
@@ -121,6 +129,20 @@ function PuzzleScreen() {
         "Your puzzle has not been marked complete. Please try again.",
       );
     }
+  };
+
+  const handleCheckAnswer = () => {
+    if (!answerInput.trim()) {
+      Alert.alert("Enter an answer", "Type your answer before checking it.");
+      return;
+    }
+
+    if (!isPuzzleAnswerCorrect(answerInput, currentPuzzle.answer)) {
+      Alert.alert("Not quite", "That answer is not correct yet. Try again!");
+      return;
+    }
+
+    handleSolved();
   };
 
   if (!currentPuzzle) {
@@ -264,30 +286,51 @@ function PuzzleScreen() {
         )}
 
         {!showAnswer && canSolve && (
-          <TouchableOpacity
-            onPress={handleSolved}
-            style={{
-              backgroundColor: "#10b981",
-              padding: 18,
-              borderRadius: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              marginBottom: 20,
-            }}
-          >
-            <CheckCircle size={24} color="#fff" />
-            <Text
+          <View style={{ marginBottom: 20 }}>
+            <TextInput
+              value={answerInput}
+              onChangeText={setAnswerInput}
+              onSubmitEditing={handleCheckAnswer}
+              returnKeyType="done"
+              placeholder="Type your answer"
+              placeholderTextColor={colors.mutedText}
+              accessibilityLabel="Your answer"
               style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: "#fff",
+                backgroundColor: colors.surface,
+                color: colors.primaryText,
+                borderColor: colors.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                fontSize: 16,
+                marginBottom: 12,
+              }}
+            />
+            <TouchableOpacity
+              onPress={handleCheckAnswer}
+              style={{
+                backgroundColor: "#10b981",
+                padding: 18,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
               }}
             >
-              I Solved It!
-            </Text>
-          </TouchableOpacity>
+              <CheckCircle size={24} color="#fff" />
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "#fff",
+                }}
+              >
+                Check Answer
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         {showAnswer && (

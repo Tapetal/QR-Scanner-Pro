@@ -6,7 +6,6 @@ jest.mock(
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { chooseDailyPuzzle, getLocalDateKey } from "../dailyPuzzle";
 import {
-  canSolveToday,
   getDailyPuzzle,
   getSolvedPuzzles,
   markPuzzleSolved,
@@ -85,11 +84,42 @@ describe("daily puzzle selection", () => {
     expect(result.solved).toHaveLength(1);
     expect(duplicate.alreadySolved).toBe(true);
     expect(await getSolvedPuzzles()).toHaveLength(1);
-    expect(await canSolveToday(new Date(2026, 9, 23, 23))).toBe(false);
 
     const nextDay = await getDailyPuzzle(puzzleBank, new Date(2026, 9, 24, 10));
     await markPuzzleSolved(nextDay.puzzle, new Date(2026, 9, 24, 10));
     expect(await getSolvedPuzzles()).toHaveLength(2);
-    expect(await canSolveToday(new Date(2026, 9, 24, 12))).toBe(false);
+  });
+
+  it("does not mark a different daily puzzle complete from an older same-day solve", async () => {
+    const today = new Date(2026, 9, 23, 10);
+    const daily = await getDailyPuzzle(puzzleBank, today);
+    const otherPuzzle = puzzleBank.find(
+      (puzzle) => puzzle.id !== daily.puzzle.id,
+    );
+
+    await AsyncStorage.setItem(
+      "puzzle_solved",
+      JSON.stringify([
+        { ...otherPuzzle, solvedAt: today.toISOString(), streak: 1 },
+      ]),
+    );
+
+    const reopened = await getDailyPuzzle(puzzleBank, today);
+    expect(reopened.puzzle.id).toBe(daily.puzzle.id);
+    expect(reopened.completed).toBe(false);
+  });
+
+  it("restores completion when this assigned puzzle is already in the archive", async () => {
+    const today = new Date(2026, 9, 23, 10);
+    const daily = await getDailyPuzzle(puzzleBank, today);
+    await AsyncStorage.setItem(
+      "puzzle_solved",
+      JSON.stringify([
+        { ...daily.puzzle, solvedAt: today.toISOString(), streak: 1 },
+      ]),
+    );
+
+    const reopened = await getDailyPuzzle(puzzleBank, today);
+    expect(reopened.completed).toBe(true);
   });
 });

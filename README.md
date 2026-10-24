@@ -8,7 +8,7 @@ The mobile app is built with Expo, React Native, and Expo Router. It provides:
 
 - **Scan:** Scan QR codes with the camera and keep a local scan history.
 - **Generate:** Create QR codes for text, URLs, and Wi-Fi credentials. Wi-Fi data is sent to the QR image service only after the app asks for consent.
-- **Daily puzzle:** Solve an offline daily riddle, use a hint, and track completed puzzles and streaks. Puzzle selection varies by installation and avoids recent repeats where possible.
+- **Daily puzzle:** Enter an answer to the offline daily riddle, use a hint, and track completed puzzles and streaks. Puzzle selection varies by installation and avoids recent repeats where possible.
 - **Archive:** Review saved scan and puzzle history.
 - **Profile and settings:** View puzzle stats, choose Light, Dark, or System appearance, and optionally schedule a daily 9 AM local-time puzzle reminder.
 - **Advertising:** Google AdMob banner ads are integrated into the app.

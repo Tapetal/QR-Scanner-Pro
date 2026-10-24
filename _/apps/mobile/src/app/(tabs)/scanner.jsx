@@ -18,19 +18,9 @@ import {
   AdEventType,
   TestIds,
 } from "react-native-google-mobile-ads";
-import mobileAds from 'react-native-google-mobile-ads';
 import AdBanner from "../../components/AdBanner";
 import { ThemedText as Text, useTheme } from "../../utils/ThemeProvider";
-
-// CRITICAL: Initialize AdMob
-mobileAds()
-  .initialize()
-  .then(adapterStatuses => {
-    console.log('✅ AdMob initialized in Scanner');
-  })
-  .catch(error => {
-    console.error('❌ AdMob init error:', error);
-  });
+import { initializeMobileAds } from "../../utils/mobileAds";
 
 // Storage helper
 const addToHistory = async (scanData) => {
@@ -111,8 +101,11 @@ function ScanScreen() {
     );
 
     // Start loading the first ad
-    console.log('🔄 Loading first interstitial ad...');
-    interstitial.load();
+    initializeMobileAds()
+      .then(() => interstitial.load())
+      .catch((error) => {
+        console.error("Unable to initialize interstitial ad:", error);
+      });
 
     return () => {
       unsubscribeLoaded();
